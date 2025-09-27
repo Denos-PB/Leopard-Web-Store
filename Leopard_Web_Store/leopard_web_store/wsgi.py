@@ -1,5 +1,5 @@
 """
-WSGI config for leopard_web_store project.
+WSGI config for Leopard_Web_Store project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "leopard_web_store.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "Leopard_Web_Store.settings")
 
 application = get_wsgi_application()
