@@ -22,9 +22,11 @@ jobs:
 
     - name: Install dependencies
       run: |
+        python -m pip install --upgrade pip
         pip install -r requirements.txt
 
     - name: Run Django tests (Windows)
+      working-directory: ./Leopard_Web_Store
       run: |
         python manage.py test
       env:
@@ -46,53 +48,59 @@ jobs:
 
     - name: Install dependencies
       run: |
+        pip install --upgrade pip
         pip install -r requirements.txt
 
     - name: Run Django tests (Linux)
+      working-directory: ./Leopard_Web_Store
       run: |
         python manage.py test
       env:
         SECRET_KEY: test-secret-key-123
         DEBUG: "True"
 
-  deploy-simulation:
-    name: Deploy Simulation
+  deploy-ssh:
+    name: Deploy via SSH
     runs-on: ubuntu-latest
-    needs: [test-windows, test-ubuntu]  # ✅ Чекаємо обидва тести
+    needs: [test-windows, test-ubuntu]
     if: github.ref == 'refs/heads/main'
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Set up Python 3.12
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.12
-
-    - name: Install dependencies
+    - name: Setup SSH and deploy
       run: |
-        pip install -r requirements.txt
+        # Налаштовуємо SSH
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+        chmod 600 ~/.ssh/id_ed25519
+        
+        # Додаємо хост до known_hosts
+        ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+        
+        # Деплой через SSH
+        echo "🚀 Початок деплою через SSH..."
+        ssh -i ~/.ssh/id_ed25519 ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
+          cd /home/dima/Projects/Leopard-Web-Store
+          git pull origin main
+          source .venv/bin/activate
+          pip install -r requirements.txt
+          cd Leopard_Web_Store
+          python manage.py migrate
+          python manage.py collectstatic --noinput
+          pkill -f "python manage.py runserver" || true
+          nohup python manage.py runserver 0.0.0.0:8000 > server.log 2>&1 &
+          echo "✅ Деплой на сервер успішний!"
+        EOF
 
-    - name: Run migrations and collectstatic
+    - name: Verify deployment
       run: |
-        python manage.py migrate
-        python manage.py collectstatic --noinput
-      env:
-        SECRET_KEY: test-secret-key-123
-        DEBUG: "True"
-
-    - name: Simulate Deployment
-      run: |
-        echo "🎯 Симуляція деплою на сервер..."
-        echo "📋 Кроки, які виконав би реальний деплой:"
-        echo "1. Підключення до сервера через SSH ✅"
-        echo "2. Оновлення коду з Git ✅"
-        echo "3. Встановлення залежностей ✅"
-        echo "4. Застосування міграцій ✅"
-        echo "5. Запуск сервера ✅"
-        echo ""
-        echo "🔧 Для реального деплою виконайте локально:"
-        echo "python manage.py runserver"
-        echo ""
-        echo "✅ Всі тести пройдені! Проект готовий до деплою"
+        echo "🔍 Перевірка деплою..."
+        ssh -i ~/.ssh/id_ed25519 ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "
+          cd /home/dima/Projects/Leopard-Web-Store/Leopard_Web_Store
+          echo '📊 Статус сервера:'
+          ps aux | grep 'python manage.py runserver' | grep -v grep || echo '❌ Сервер не працює'
+          echo '📋 Останні логи:'
+          tail -5 server.log || echo 'Логи відсутні'
+        "
