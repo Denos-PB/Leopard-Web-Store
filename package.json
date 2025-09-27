@@ -1,0 +1,17 @@
+{
+  "name": "leopard-web-store-frontend",
+  "version": "1.0.0",
+  "description": "Frontend for Leopard Web Store - a modern online clothing store",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "keywords": ["fashion", "ecommerce", "clothing"],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}
