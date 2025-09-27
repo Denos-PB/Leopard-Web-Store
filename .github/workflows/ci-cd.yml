@@ -32,6 +32,7 @@ jobs:
         pip install coverage
 
     - name: Run Django migrations
+      working-directory: ./Leopard_web_store
       run: |
         python manage.py migrate
       env:
@@ -39,6 +40,7 @@ jobs:
         DEBUG: "True"
 
     - name: Run Django tests
+      working-directory: ./Leopard_web_store
       run: |
         python manage.py test
       env:
@@ -46,6 +48,7 @@ jobs:
         DEBUG: "True"
 
     - name: Check if frontend exists and test
+      working-directory: ./Leopard_web_store
       run: |
         if (Test-Path package.json) { 
           npm install
@@ -83,6 +86,7 @@ jobs:
         pip install coverage
 
     - name: Run Django migrations
+      working-directory: ./Leopard_web_store
       run: |
         python manage.py migrate
       env:
@@ -90,6 +94,7 @@ jobs:
         DEBUG: "True"
 
     - name: Run Django tests
+      working-directory: ./Leopard_web_store
       run: |
         python manage.py test
       env:
@@ -97,6 +102,7 @@ jobs:
         DEBUG: "True"
 
     - name: Check if frontend exists and test
+      working-directory: ./Leopard_web_store
       run: |
         if [ -f package.json ]; then
           npm install
