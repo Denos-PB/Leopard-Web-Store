@@ -32,7 +32,7 @@ jobs:
         pip install coverage
 
     - name: Run Django migrations
-      working-directory: ./Leopard_web_store
+      working-directory: ./Leopard_Web_Store
       run: |
         python manage.py migrate
       env:
@@ -40,7 +40,7 @@ jobs:
         DEBUG: "True"
 
     - name: Run Django tests
-      working-directory: ./Leopard_web_store
+      working-directory: ./Leopard_Web_Store
       run: |
         python manage.py test
       env:
@@ -48,7 +48,7 @@ jobs:
         DEBUG: "True"
 
     - name: Check if frontend exists and test
-      working-directory: ./Leopard_web_store
+      working-directory: ./Leopard_Web_Store
       run: |
         if (Test-Path package.json) { 
           npm install
@@ -86,7 +86,7 @@ jobs:
         pip install coverage
 
     - name: Run Django migrations
-      working-directory: ./Leopard_web_store
+      working-directory: ./Leopard_Web_Store
       run: |
         python manage.py migrate
       env:
@@ -94,7 +94,7 @@ jobs:
         DEBUG: "True"
 
     - name: Run Django tests
-      working-directory: ./Leopard_web_store
+      working-directory: ./Leopard_Web_Store
       run: |
         python manage.py test
       env:
@@ -102,7 +102,7 @@ jobs:
         DEBUG: "True"
 
     - name: Check if frontend exists and test
-      working-directory: ./Leopard_web_store
+      working-directory: ./Leopard_Web_Store
       run: |
         if [ -f package.json ]; then
           npm install
@@ -138,7 +138,7 @@ jobs:
         username: ${{ secrets.SSH_USERNAME }}
         password: ${{ secrets.SSH_PASSWORD }}
         script: |
-          cd /home/${{ secrets.SSH_USERNAME }}/leopard-web-store
+          cd /home/${{ secrets.SSH_USERNAME }}/leopard-Web-Store
           git pull origin main
           pip install -r requirements.txt
           python manage.py migrate
