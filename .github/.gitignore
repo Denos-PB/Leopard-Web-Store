@@ -1,0 +1,200 @@
+# Django
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+.Python
+env/
+.venv/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# База даних (SQLite)
+*.sqlite3
+*.db
+db.sqlite3
+
+# Django media і static файли
+/media/
+/staticfiles/
+!media/.gitkeep
+!staticfiles/.gitkeep
+
+# Змінні оточення
+.env
+.env.local
+.env.production
+.env.staging
+.secrets
+
+# Логи
+*.log
+logs/
+
+# IDE та редактори
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Node.js (якщо буде фронтенд)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+.pytest_cache/
+
+# Build та distribution
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Temporary files
+temp/
+tmp/
+
+# Файли операційної системи
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+
+# Віртуальні оточення Python
+.venv
+venv/
+ENV/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+
+# Backup files
+*.bak
+*.backup
+
+# SQLite journal files
+*.sqlite3-journal
+
+# Django secret key
+secret_key.txt
+
+# Pillow (images) temporary files
+*.tmp
+
+# Email backups
+*.eml
+
+# Package files
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Unit test / coverage reports
+.tox/
+.nox/
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Translations
+*.mo
+*.pot
+
+# Scrapy
+scrapy.d/
+
+# Sphinx
+docs/_build/
+
+# PyBuilder
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# PEP 582
+__pypackages__/
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath
+sage
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder
+.spyderproject
+.spyproject
+
+# Rope
+.ropeproject
+
+# mkdocs
+site/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre
+.pyre/
