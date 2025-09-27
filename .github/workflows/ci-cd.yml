@@ -62,45 +62,75 @@ jobs:
   deploy-ssh:
     name: Deploy via SSH
     runs-on: ubuntu-latest
-    needs: [test-windows, test-ubuntu]
+    needs: [ test-windows, test-ubuntu ]
     if: github.ref == 'refs/heads/main'
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup SSH and deploy
-      run: |
-        # Налаштовуємо SSH
-        mkdir -p ~/.ssh
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
-        chmod 600 ~/.ssh/id_ed25519
-        
-        # Додаємо хост до known_hosts
-        ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
-        
-        # Деплой через SSH
-        echo "🚀 Початок деплою через SSH..."
-        ssh -i ~/.ssh/id_ed25519 ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
-          cd /home/dima/Projects/Leopard-Web-Store
-          git pull origin main
-          source .venv/bin/activate
-          pip install -r requirements.txt
-          cd Leopard_Web_Store
-          python manage.py migrate
-          python manage.py collectstatic --noinput
-          pkill -f "python manage.py runserver" || true
-          nohup python manage.py runserver 0.0.0.0:8000 > server.log 2>&1 &
-          echo "✅ Деплой на сервер успішний!"
-        EOF
-
-    - name: Verify deployment
-      run: |
-        echo "🔍 Перевірка деплою..."
-        ssh -i ~/.ssh/id_ed25519 ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "
-          cd /home/dima/Projects/Leopard-Web-Store/Leopard_Web_Store
-          echo '📊 Статус сервера:'
-          ps aux | grep 'python manage.py runserver' | grep -v grep || echo '❌ Сервер не працює'
-          echo '📋 Останні логи:'
-          tail -5 server.log || echo 'Логи відсутні'
-        "
+      - name: Setup SSH and deploy
+        run: |
+          set -x  # Детальний вивід для дебаггінгy
+          
+          # Налаштовуємо SSH
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          
+          # Записуємо приватний ключ
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          
+          # Додаємо хост до known_hosts
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
+          
+          # Перевіряємо ключ
+          echo "🔑 Перевірка SSH ключа:"
+          ls -la ~/.ssh/
+          head -2 ~/.ssh/id_ed25519
+          
+          # Тестуємо підключення
+          echo "🔍 Тестуємо підключення до сервера..."
+          ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "echo '✅ Підключення успішне!'" || echo "❌ Помилка підключення"
+          
+          # Деплой через SSH
+          echo "🚀 Початок деплою через SSH..."
+          ssh -o ConnectTimeout=30 -i ~/.ssh/id_ed25519 ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
+            set -e  # Зупинитися при першій помилці
+            set -x  # Детальний вивід
+          
+            echo "📁 Перехожу в папку проекту..."
+            cd /home/dima/Projects/Leopard-Web-Store || { echo "❌ Папка не знайдена"; exit 1; }
+          
+            echo "🔄 Оновлюю код з Git..."
+            git pull origin main || { echo "❌ Помилка Git pull"; exit 1; }
+          
+            echo "🐍 Активую віртуальне оточення..."
+            source .venv/bin/activate || { echo "❌ Помилка активації venv"; exit 1; }
+          
+            echo "📦 Встановлюю залежності..."
+            pip install -r requirements.txt || { echo "❌ Помилка встановлення залежностей"; exit 1; }
+          
+            echo "📁 Перехожу в папку Django проекту..."
+            cd Leopard_Web_Store || { echo "❌ Папка Leopard_Web_Store не знайдена"; exit 1; }
+          
+            echo "🗃️ Виконую міграції..."
+            python manage.py migrate || { echo "❌ Помилка міграцій"; exit 1; }
+          
+            echo "📊 Збираю статичні файли..."
+            python manage.py collectstatic --noinput || { echo "❌ Помилка збору статики"; exit 1; }
+          
+            echo "🛑 Зупиняю старий сервер..."
+            pkill -f "python manage.py runserver" || echo "ℹ️ Сервер не був запущений"
+          
+            echo "🚀 Запускаю новий сервер..."
+            nohup python manage.py runserver 0.0.0.0:8000 > server.log 2>&1 &
+          
+            echo "⏳ Чекаю 3 секунди..."
+            sleep 3
+          
+            echo "🔍 Перевіряю статус сервера..."
+            ps aux | grep "python manage.py runserver" | grep -v grep && echo "✅ Сервер запущений" || echo "❌ Сервер не запущений"
+          
+            echo "🎉 Деплой успішний!"
+          EOF
