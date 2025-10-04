@@ -17,6 +17,9 @@ drf-yasg==1.21.10
 # Environment Variables
 python-decouple==3.8
 
+#JWT
+djangorestframework-simplejwt
+
 # Filtering
 django-filter==23.3
 
