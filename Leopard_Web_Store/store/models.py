@@ -64,3 +64,45 @@ class CartItem(models.Model):
 	def __str__(self):
 		return f"{self.quantity} x {self.product.name}"
 
+
+class Product(models.Model):
+    # Модель для товарів
+    name = models.CharField(max_length=255, verbose_name="Назва")
+    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Ціна")
+    image = models.ImageField(upload_to="products/", blank=True, null=True, verbose_name="Зображення")
+    gender = models.CharField(max_length=20, verbose_name="Стать")
+    size = models.CharField(max_length=20, verbose_name="Розмір")
+    description = models.TextField(blank=True, verbose_name="Опис")
+
+    def __str__(self):
+        return self.name
+
+"""
+Повертає значення поля name відповідної моделі.
+
+Для моделі Product – повертається назва товару 
+(наприклад, "Футболка чорна", "Пальто зимове", "Кросівки Nike" тощо).
+"""
+
+
+class CartItem(models.Model):
+    # Модель для елементів кошика
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name="cart_items",
+        verbose_name="Товар"
+    )
+    quantity = models.PositiveIntegerField(default=1, verbose_name="Кількість")
+
+    def __str__(self):
+        return f"{self.product.name} × {self.quantity}"
+
+"""
+Метод __str__ повертає назву товару та кількість у вигляді рядка.
+
+Для моделі CartItem – повертається, наприклад: 
+"Футболка чорна × 2", "Пальто зимове × 1", "Кросівки Nike × 3" тощо.
+"""
+
+
