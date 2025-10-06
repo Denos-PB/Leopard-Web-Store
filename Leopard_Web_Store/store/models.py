@@ -1,18 +1,18 @@
 from django.db import models
 from django.conf import settings
 """
-70 и 90 рядок добавлены окончания (s) к названиям классов, чтобы избежать дублирования
+70 и 117 рядок добавлены окончания (s) к названиям классов, чтобы избежать дублирования
 """
 
 class Category(models.Model):
-    #Модель для категорій товарів
-	name = models.CharField(max_length=255, unique=True)
+    # Модель для категорій товарів
+    name = models.CharField(max_length=255, unique=True, verbose_name="Категорія")
 
-	class Meta:
-		verbose_name_plural = "categories"
+    class Meta:
+        verbose_name_plural = "Категорії"
 
-	def __str__(self):
-		return self.name
+    def __str__(self):
+        return self.name
 """
 Повертає значення поля name відповідної моделі
 
@@ -68,13 +68,40 @@ class CartItem(models.Model):
 
 
 class Products(models.Model):
-    # Модель для товарів
+    # Вибір статі
+    GENDER_CHOICES = [
+        ('M', 'Чоловіча'),
+        ('F', 'Жіноча'),
+        ('U', 'Унісекс'),
+    ]
+
+    # Вибір розміру
+    SIZE_CHOICES = [
+        ('XS', 'XS'),
+        ('S', 'S'),
+        ('M', 'M'),
+        ('L', 'L'),
+        ('XL', 'XL'),
+        ('XXL', 'XXL'),
+    ]
+
+    # Поля товару
     name = models.CharField(max_length=255, verbose_name="Назва")
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Ціна")
     image = models.ImageField(upload_to="products/", blank=True, null=True, verbose_name="Зображення")
-    gender = models.CharField(max_length=20, verbose_name="Стать")
-    size = models.CharField(max_length=20, verbose_name="Розмір")
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, verbose_name="Стать")
+    size = models.CharField(max_length=3, choices=SIZE_CHOICES, verbose_name="Розмір")
     description = models.TextField(blank=True, verbose_name="Опис")
+
+    # Зовнішній ключ на категорію
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="products",
+        verbose_name="Категорія"
+    )
 
     def __str__(self):
         return self.name
@@ -88,23 +115,29 @@ class Products(models.Model):
 
 
 class CartItems(models.Model):
-    # Модель для елементів кошика
-    product = models.ForeignKey(
-        Products,
-        on_delete=models.CASCADE,
-        related_name="cart_items",
-        verbose_name="Товар"
-    )
-    quantity = models.PositiveIntegerField(default=1, verbose_name="Кількість")
+    # Модель для елементів кошика покупок
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name="cart_items")
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["cart", "product"], name="unique_cart_product")
+        ]
 
     def __str__(self):
-        return f"{self.product.name} × {self.quantity}"
+        return f"{self.quantity} x {self.product.name}"
+
+    def get_total_price(self):
+        return self.product.price * self.quantity
 
 """
 Метод __str__ повертає назву товару та кількість у вигляді рядка.
 
 Для моделі CartItem – повертається, наприклад: 
 "Футболка чорна × 2", "Пальто зимове × 1", "Кросівки Nike × 3" тощо.
+
+Метод get_total_price повертає загальну ціну цього товару в кошику (ціна * кількість).
 """
 
 
