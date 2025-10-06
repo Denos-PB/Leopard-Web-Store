@@ -1,6 +1,8 @@
 from django.db import models
 from django.conf import settings
-
+"""
+70 и 90 рядок добавлены окончания (s) к названиям классов, чтобы избежать дублирования
+"""
 
 class Category(models.Model):
     #Модель для категорій товарів
@@ -65,7 +67,7 @@ class CartItem(models.Model):
 		return f"{self.quantity} x {self.product.name}"
 
 
-class Product(models.Model):
+class Products(models.Model):
     # Модель для товарів
     name = models.CharField(max_length=255, verbose_name="Назва")
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Ціна")
@@ -85,10 +87,10 @@ class Product(models.Model):
 """
 
 
-class CartItem(models.Model):
+class CartItems(models.Model):
     # Модель для елементів кошика
     product = models.ForeignKey(
-        Product,
+        Products,
         on_delete=models.CASCADE,
         related_name="cart_items",
         verbose_name="Товар"
