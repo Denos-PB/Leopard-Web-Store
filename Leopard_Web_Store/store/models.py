@@ -1,8 +1,5 @@
 from django.db import models
 from django.conf import settings
-"""
-70 и 117 рядок добавлены окончания (s) к названиям классов, чтобы избежать дублирования
-"""
 
 class Category(models.Model):
     # Модель для категорій товарів
@@ -19,23 +16,84 @@ class Category(models.Model):
 Для моделі Category - повертається назва категорії (наприклад, "Верхній одяг", "Аксесуари", "Взуття" тощо)
 """
 
+class Gender(models.Model):
+    """Фіксовані варіанти статі товару."""
+    GENDER_CHOICES = [
+        ('M', 'Чоловіча'),
+        ('F', 'Жіноча'),
+        ('U', 'Унісекс'),
+    ]
+
+    code = models.CharField(
+        max_length=1,
+        choices=GENDER_CHOICES,
+        unique=True,
+        verbose_name="Стать"
+    )
+
+    class Meta:
+        verbose_name = "Стать"
+        verbose_name_plural = "Статі"
+
+    def __str__(self):
+        return self.get_code_display()
+
+    class Size(models.Model):
+        """Фіксовані варіанти розміру товару."""
+        SIZE_CHOICES = [
+            ('XS', 'XS'),
+            ('S', 'S'),
+            ('M', 'M'),
+            ('L', 'L'),
+            ('XL', 'XL'),
+            ('XXL', 'XXL'),
+        ]
+
+        code = models.CharField(
+            max_length=3,
+            choices=SIZE_CHOICES,
+            unique=True,
+            verbose_name="Розмір"
+        )
+
+        class Meta:
+            verbose_name = "Розмір"
+            verbose_name_plural = "Розміри"
+
+        def __str__(self):
+            return self.code
+
 class Product(models.Model):
-    #Модель для товарів
-	name = models.CharField(max_length=255)
-	description = models.TextField(blank=True)
-	price = models.DecimalField(max_digits=10, decimal_places=2)
-	category = models.ForeignKey(
-		Category, null=True, blank=True, on_delete=models.SET_NULL, related_name="products"
-	)
+    """Основна модель товару."""
+    name = models.CharField(max_length=255, verbose_name="Назва")
+    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Ціна")
+    image = models.ImageField(upload_to="products/", blank=True, null=True, verbose_name="Зображення")
+    description = models.TextField(blank=True, verbose_name="Опис")
 
-	def __str__(self):
-		return self.name
+    gender = models.ForeignKey("Gender", on_delete=models.SET_NULL, null=True, verbose_name="Стать")
+    size = models.ForeignKey("Size", on_delete=models.SET_NULL, null=True, verbose_name="Розмір")
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="products",
+        verbose_name="Категорія"
+    )
+
+    class Meta:
+        verbose_name = "Товар"
+        verbose_name_plural = "Товари"
+
+    def __str__(self):
+        return self.name
+
 """
-Повертає значення поля name відповідної моделі
+Повертає значення поля name відповідної моделі.
 
-Для моделі Product - повертається назва товару (наприклад, "Пальто", "Футболка чорна", "Червоні черевичкі" тощо)
-"""        
-
+Для моделі Product – повертається назва товару 
+(наприклад, "Футболка чорна", "Пальто зимове", "Кросівки Nike" тощо).
+"""
 
 class Cart(models.Model):
     #Модель для кошика покупок
@@ -53,68 +111,6 @@ class Cart(models.Model):
 """
 
 class CartItem(models.Model):
-    #Модель для елементів кошика покупок
-	cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name="cart_items")
-	product = models.ForeignKey(Product, on_delete=models.CASCADE)
-	quantity = models.PositiveIntegerField(default=1)
-
-	class Meta:
-		constraints = [
-			models.UniqueConstraint(fields=["cart", "product"], name="unique_cart_product")
-		]
-
-	def __str__(self):
-		return f"{self.quantity} x {self.product.name}"
-
-
-class Products(models.Model):
-    # Вибір статі
-    GENDER_CHOICES = [
-        ('M', 'Чоловіча'),
-        ('F', 'Жіноча'),
-        ('U', 'Унісекс'),
-    ]
-
-    # Вибір розміру
-    SIZE_CHOICES = [
-        ('XS', 'XS'),
-        ('S', 'S'),
-        ('M', 'M'),
-        ('L', 'L'),
-        ('XL', 'XL'),
-        ('XXL', 'XXL'),
-    ]
-
-    # Поля товару
-    name = models.CharField(max_length=255, verbose_name="Назва")
-    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Ціна")
-    image = models.ImageField(upload_to="products/", blank=True, null=True, verbose_name="Зображення")
-    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, verbose_name="Стать")
-    size = models.CharField(max_length=3, choices=SIZE_CHOICES, verbose_name="Розмір")
-    description = models.TextField(blank=True, verbose_name="Опис")
-
-    # Зовнішній ключ на категорію
-    category = models.ForeignKey(
-        Category,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="products",
-        verbose_name="Категорія"
-    )
-
-    def __str__(self):
-        return self.name
-
-"""
-Повертає значення поля name відповідної моделі.
-
-Для моделі Product – повертається назва товару 
-(наприклад, "Футболка чорна", "Пальто зимове", "Кросівки Nike" тощо).
-"""
-
-
-class CartItems(models.Model):
     # Модель для елементів кошика покупок
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name="cart_items")
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
