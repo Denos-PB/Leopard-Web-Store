@@ -95,8 +95,7 @@ class Product(models.Model):
 (наприклад, "Футболка чорна", "Пальто зимове", "Кросівки Nike" тощо).
 """
 
-class Cart(models.Model):
-    #Модель для кошика покупок
+class Cart(models.Model): #Модель для кошика покупок
 	user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="carts")
 	items = models.ManyToManyField(Product, through="CartItem", related_name="carts")
 	created_at = models.DateTimeField(auto_now_add=True)
@@ -110,8 +109,7 @@ class Cart(models.Model):
 
 """
 
-class CartItem(models.Model):
-    # Модель для елементів кошика покупок
+class CartItem(models.Model): # Модель для елементів кошика покупок
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name="cart_items")
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
