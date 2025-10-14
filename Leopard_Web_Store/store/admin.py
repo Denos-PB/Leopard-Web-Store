@@ -13,6 +13,12 @@ class ProductAdmin(admin.ModelAdmin):
     list_per_page = 25
     autocomplete_fields = ('category',)
 
+    def image_preview(self, obj):
+        if obj.image:
+            return format_html('<img src="{}" style="width: 50px; height: 50px; object-fit: cover;" />', obj.image.url)
+        return "No image"
+    image_preview.short_description = 'Image Preview'
+
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name',)

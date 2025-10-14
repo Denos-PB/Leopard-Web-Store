@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.contrib.auth.models import AbstractUser
 
 class Category(models.Model):
     # Модель для категорій товарів
@@ -135,3 +136,16 @@ class CartItem(models.Model): # Модель для елементів коши�
 """
 
 
+class User(AbstractUser):
+    ROLE_CHOICES = [
+        ('admin', 'Admin'),
+        ('user', 'User'),
+        ('moderator', 'Moderator'),
+    ]
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='user')
+
+    def __str__(self):
+        return self.username
+
+    class Meta:
+        app_label = 'store'
