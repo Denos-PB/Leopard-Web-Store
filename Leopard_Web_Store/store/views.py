@@ -3,16 +3,17 @@ from rest_framework.permissions import AllowAny
 from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import Product, Cart, CartItem
-from .serializers import ProductSerializer, AddToCartSerializer
+from .serializers import ProductSerializer, AddToCartSerializer, CartSerializer
 from .decorators import admin_required, role_required
 
 User = get_user_model()
-
 
 """Список товарів"""
 class ProductListView(generics.ListAPIView):
@@ -112,6 +113,16 @@ class AdminOnlyView(APIView):
     @admin_required
     def get(self, request):
         return Response({'message': 'This is an admin-only endpoint', 'user_id': request.user_id}, status=status.HTTP_200_OK)
+
+class CartView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        # Отримуємо або створюємо кошик користувача
+        cart, created = Cart.objects.get_or_create(user=request.user)
+        serializer = CartSerializer(cart)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class ModeratorView(APIView):
     @role_required(['admin', 'moderator'])
