@@ -1,6 +1,6 @@
 # Django
 *.pyc
-*.__pycache__/
+__pycache__/
 *.pyo
 *.pyd
 .Python
@@ -10,6 +10,9 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
+# Django migrations
+migrations/
 
 # База даних (SQLite)
 *.sqlite3
