@@ -10,7 +10,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-idea/
+.idea/
 
 # Django migrations
 migrations/
@@ -39,7 +39,6 @@ logs/
 
 # IDE та редактори
 .vscode/
-.idea/
 *.swp
 *.swo
 *~
